@@ -1,35 +1,34 @@
 'use client';
 
 import BottomNav from '../components/BottomNav';
-import { 
-  Wallet, 
-  ConnectWallet, 
-  WalletDropdown, 
-  WalletDropdownDisconnect, 
-  WalletDropdownLink, 
-  WalletDropdownBasename, 
-  WalletDropdownFundLink 
+import {
+  Wallet,
+  ConnectWallet,
+  WalletDropdown,
+  WalletDropdownDisconnect,
+  WalletDropdownLink,
+  WalletDropdownBasename,
+  WalletDropdownFundLink
 } from '@coinbase/onchainkit/wallet';
-import { 
-  Identity, 
-  Avatar, 
-  Name, 
-  Address, 
-  EthBalance 
+import {
+  Identity,
+  Avatar,
+  Name,
+  Address,
+  EthBalance
 } from '@coinbase/onchainkit/identity';
-import { 
-  Transaction, 
-  TransactionButton, 
-  TransactionSponsor, 
-  TransactionStatus, 
-  TransactionStatusLabel, 
-  TransactionStatusAction, 
-  TransactionToast, 
-  TransactionToastIcon, 
-  TransactionToastLabel, 
-  TransactionToastAction 
+import {
+  Transaction,
+  TransactionButton,
+  TransactionSponsor,
+  TransactionStatus,
+  TransactionStatusLabel,
+  TransactionStatusAction,
+  TransactionToast,
+  TransactionToastIcon,
+  TransactionToastLabel,
+  TransactionToastAction
 } from '@coinbase/onchainkit/transaction';
-import { Checkout, CheckoutButton, CheckoutStatus } from '@coinbase/onchainkit/checkout';
 import { useAccount, useSignMessage } from 'wagmi';
 import { useState } from 'react';
 
@@ -109,7 +108,7 @@ export default function ExamplesPage() {
           Displays user identity information (Avatar, Name, Address).
         </p>
         {isConnected && address ? (
-          <Identity 
+          <Identity
             address={address}
             schemaId="0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9"
             className="bg-gray-100 p-4 rounded-lg"
@@ -133,7 +132,7 @@ export default function ExamplesPage() {
         </p>
         {isConnected ? (
           <Transaction
-            chainId={84532} // Base Sepolia
+            chainId={84532} // (84532=Base Sepolia) IMPORTANT!: For Base mainnet use 8453
             calls={calls}
             onStatus={(status) => console.log('Transaction status:', status)}
           >
@@ -154,19 +153,6 @@ export default function ExamplesPage() {
         )}
       </section>
 
-      {/* Checkout Component */}
-      <section className="w-full max-w-md border p-4 rounded-lg bg-white">
-        <h2 className="text-xl font-bold mb-4">5. Checkout Component</h2>
-        <p className="mb-4 text-sm text-gray-600">
-          One-click checkout experience for onchain commerce.
-          (Requires a valid productId)
-        </p>
-        <Checkout productId="my-product-id">
-          <CheckoutButton coinbaseBranded className="bg-[#0000ff] text-button-text" />
-          <CheckoutStatus />
-        </Checkout>
-      </section>
-
       {/* Signature Component */}
       <section className="w-full max-w-md border p-4 rounded-lg bg-white">
         <h2 className="text-xl font-bold mb-4">6. Signature (Sign Message)</h2>
@@ -175,7 +161,7 @@ export default function ExamplesPage() {
         </p>
         {isConnected ? (
           <div className="flex flex-col gap-2">
-            <button 
+            <button
               onClick={handleSign}
               className="bg-[#0000ff] text-button-text px-4 py-2 rounded hover:bg-blue-700"
             >
