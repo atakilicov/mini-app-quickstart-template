@@ -9,32 +9,47 @@ export default function Home() {
   const { isFrameReady } = useMiniKit();
   const [totalAmount, setTotalAmount] = useState<string>("");
   const [peopleCount, setPeopleCount] = useState<string>("2");
-  const [splitAmount, setSplitAmount] = useState<number>(0);
-  const [isLinkCreated, setIsLinkCreated] = useState(false);
+  const [splitResult, setSplitResult] = useState<{ splitAmount: number, paymentLink: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Reset result when inputs change
   useEffect(() => {
-    if (totalAmount && peopleCount) {
-      const total = parseFloat(totalAmount);
-      const people = parseInt(peopleCount);
-      if (!isNaN(total) && !isNaN(people) && people > 0) {
-        setSplitAmount(total / people);
-      } else {
-        setSplitAmount(0);
-      }
-    }
+    setSplitResult(null);
   }, [totalAmount, peopleCount]);
 
-  const handleCreateRequest = () => {
-    if (splitAmount > 0) {
-      setIsLinkCreated(true);
-      // In a real app, this would generate a unique link with parameters
-      // e.g., ?amount=25&recipient=0x...
+  const handleCreateRequest = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/split', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          totalAmount,
+          peopleCount,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSplitResult({
+          splitAmount: data.data.splitAmount,
+          paymentLink: data.data.paymentLink
+        });
+      } else {
+        alert(data.error || 'Something went wrong');
+      }
+    } catch (error) {
+      alert('Failed to connect to backend');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handlePay = async () => {
-    // This is where we would trigger the transaction
-    alert(`Initiating payment of ${splitAmount.toFixed(4)} ETH`);
+    alert(`Initiating payment of ${splitResult?.splitAmount.toFixed(4)} ETH`);
   };
 
   return (
@@ -114,49 +129,54 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Result Display */}
-            <div className="bg-blue-600/10 border border-blue-500/20 rounded-2xl p-4 flex justify-between items-center">
-              <span className="text-blue-200 font-medium">Per Person</span>
-              <span className="text-2xl font-bold text-blue-400">
-                {splitAmount > 0 ? splitAmount.toFixed(4) : "0.00"} <span className="text-sm text-blue-500/70">ETH</span>
-              </span>
-            </div>
-
           </div>
         </div>
 
         {/* Action Buttons */}
-        {!isLinkCreated ? (
+        {!splitResult ? (
           <button
             onClick={handleCreateRequest}
-            disabled={!totalAmount || parseFloat(totalAmount) <= 0}
+            disabled={!totalAmount || parseFloat(totalAmount) <= 0 || isLoading}
             className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
           >
-            <ShareIcon className="w-5 h-5" />
-            Create Split Request
+            {isLoading ? (
+              <ArrowPathIcon className="w-5 h-5 animate-spin" />
+            ) : (
+              <ShareIcon className="w-5 h-5" />
+            )}
+            {isLoading ? 'Calculating...' : 'Create Split Request'}
           </button>
         ) : (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+            {/* Result Display */}
+            <div className="bg-blue-600/10 border border-blue-500/20 rounded-2xl p-4 flex justify-between items-center">
+              <span className="text-blue-200 font-medium">Per Person</span>
+              <span className="text-2xl font-bold text-blue-400">
+                {splitResult.splitAmount.toFixed(4)} <span className="text-sm text-blue-500/70">ETH</span>
+              </span>
+            </div>
+
             <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-4 flex items-center gap-3">
               <CheckCircleIcon className="w-6 h-6 text-green-400" />
               <div>
                 <h3 className="font-bold text-green-400">Request Created!</h3>
-                <p className="text-sm text-green-400/70">Share the link with your friends.</p>
+                <p className="text-sm text-green-400/70">Ready to share.</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => {
-                  // Mock sharing
-                  alert("Link copied to clipboard!");
+                  navigator.clipboard.writeText(splitResult.paymentLink);
+                  alert("Link copied: " + splitResult.paymentLink);
                 }}
                 className="bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 rounded-xl border border-gray-700 transition-all"
               >
                 Copy Link
               </button>
               <button
-                onClick={() => setIsLinkCreated(false)}
+                onClick={() => setSplitResult(null)}
                 className="bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white font-semibold py-3 rounded-xl border border-gray-700 transition-all flex items-center justify-center gap-2"
               >
                 <ArrowPathIcon className="w-4 h-4" />
@@ -172,7 +192,7 @@ export default function Home() {
                 className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-green-600/20 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
               >
                 <CurrencyDollarIcon className="w-6 h-6" />
-                Pay {splitAmount.toFixed(4)} ETH
+                Pay {splitResult.splitAmount.toFixed(4)} ETH
               </button>
             </div>
           </div>
