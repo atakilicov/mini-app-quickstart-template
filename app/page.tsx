@@ -212,7 +212,7 @@ export default function Home() {
           id: data.data.requestId, // Use ID from backend
           amount: total,
           people: parseInt(peopleCount),
-          date: new Date().toLocaleDateString(),
+          date: new Date().toLocaleString(),
           status: 'pending'
         });
 
@@ -367,34 +367,6 @@ export default function Home() {
                     <span className="network shadow-lg">Base Sepolia</span>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Transaction History */}
-            <div className={`mt-6 ${cardBgClass} backdrop-blur-xl border ${borderClass} rounded-2xl p-4`}>
-              <h3 className="font-bold mb-3 text-sm text-gray-400">Recent Splits</h3>
-              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-                {transactions.length === 0 ? (
-                  <p className="text-center text-gray-500 text-xs py-4">No recent splits</p>
-                ) : (
-                  transactions.map((tx) => (
-                    <div
-                      key={tx.id}
-                      className="flex justify-between items-center p-3 rounded-xl bg-gray-900/50 hover:bg-gray-800/50 transition-colors"
-                    >
-                      <div>
-                        <p className="font-medium text-sm text-white">{tx.amount} ETH</p>
-                        <p className="text-xs text-gray-500">{tx.people} people • {tx.date}</p>
-                      </div>
-                      <span className={`text-xs px-2 py-1 rounded-full ${tx.status === 'completed'
-                        ? 'bg-green-500/20 text-green-400'
-                        : 'bg-yellow-500/20 text-yellow-400'
-                        }`}>
-                        {tx.status}
-                      </span>
-                    </div>
-                  ))
-                )}
               </div>
             </div>
           </div>
@@ -634,6 +606,34 @@ export default function Home() {
                 </div>
               </div>
             )}
+
+            {/* Recent Splits - Now below the form */}
+            <div className={`${cardBgClass} backdrop-blur-xl border ${borderClass} rounded-2xl p-4`}>
+              <h3 className="font-bold mb-3 text-sm text-gray-400">Recent Splits</h3>
+              <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+                {transactions.length === 0 ? (
+                  <p className="text-center text-gray-500 text-xs py-4">No recent splits</p>
+                ) : (
+                  transactions.map((tx) => (
+                    <div
+                      key={tx.id}
+                      className="flex justify-between items-center p-3 rounded-xl bg-gray-900/50 hover:bg-gray-800/50 transition-colors"
+                    >
+                      <div>
+                        <p className="font-medium text-sm text-white">{tx.amount} ETH</p>
+                        <p className="text-xs text-gray-500">{tx.people} people • {tx.date}</p>
+                      </div>
+                      <span className={`text-xs px-2 py-1 rounded-full ${tx.status === 'completed'
+                        ? 'bg-green-500/20 text-green-400'
+                        : 'bg-yellow-500/20 text-yellow-400'
+                        }`}>
+                        {tx.status}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
