@@ -1,6 +1,4 @@
-import { redirect } from 'next/navigation';
-import fs from 'fs';
-import path from 'path';
+import { getRedis } from '@/lib/redis';
 
 interface SplitData {
     id: string;
@@ -13,19 +11,18 @@ interface SplitData {
     createdAt: string;
 }
 
-const DATA_FILE_PATH = path.join(process.cwd(), 'splits.json');
-
 async function getSplit(id: string): Promise<SplitData | null> {
     try {
-        if (fs.existsSync(DATA_FILE_PATH)) {
-            const fileContent = fs.readFileSync(DATA_FILE_PATH, 'utf-8');
-            const splits: SplitData[] = JSON.parse(fileContent);
-            return splits.find(s => s.id === id) || null;
-        }
+        const redis = getRedis();
+        const data = await redis.get(`split:${id}`);
+
+        if (!data) return null;
+
+        return JSON.parse(data) as SplitData;
     } catch (error) {
-        console.error('Error reading splits file:', error);
+        console.error('Error reading split from Redis:', error);
+        return null;
     }
-    return null;
 }
 
 export default async function PayPage({ params }: { params: { id: string } }) {

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { getRedis } from '@/lib/redis';
 
 // Interface for Split Data
 interface SplitData {
@@ -13,29 +12,6 @@ interface SplitData {
     details?: any[];
     createdAt: string;
 }
-
-const DATA_FILE_PATH = path.join(process.cwd(), 'splits.json');
-
-// Helper to save split
-const saveSplit = (data: SplitData) => {
-    let splits: SplitData[] = [];
-    try {
-        if (fs.existsSync(DATA_FILE_PATH)) {
-            const fileContent = fs.readFileSync(DATA_FILE_PATH, 'utf-8');
-            splits = JSON.parse(fileContent);
-        }
-    } catch (error) {
-        console.error('Error reading splits file:', error);
-    }
-
-    splits.push(data);
-
-    try {
-        fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(splits, null, 2));
-    } catch (error) {
-        console.error('Error writing splits file:', error);
-    }
-};
 
 export async function POST(request: Request) {
     try {
@@ -68,9 +44,6 @@ export async function POST(request: Request) {
         }
 
         // 2. Business Logic (Calculation)
-        // Note: The frontend sends the mode and details, so we trust the frontend's intent
-        // but we should ideally recalculate here. For simplicity, we'll store what's sent
-        // along with the basic calculation.
         let splitAmount = total / people;
         if (splitMode === 'tip' && tipPercentage) {
             splitAmount = (total * (1 + tipPercentage / 100)) / people;
@@ -79,8 +52,9 @@ export async function POST(request: Request) {
         // 3. Generate a unique ID
         const requestId = Math.random().toString(36).substring(7);
 
-        // Use relative URL for flexibility
-        const paymentLink = `https://base-split.app/pay/${requestId}`;
+        // Use the actual deployed URL or localhost for dev
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+        const paymentLink = `${baseUrl}/pay/${requestId}`;
 
         const newSplit: SplitData = {
             id: requestId,
@@ -93,8 +67,9 @@ export async function POST(request: Request) {
             createdAt: new Date().toISOString(),
         };
 
-        // Save to file
-        saveSplit(newSplit);
+        // Save to Redis with 30 days expiry
+        const redis = getRedis();
+        await redis.setex(`split:${requestId}`, 60 * 60 * 24 * 30, JSON.stringify(newSplit));
 
         // 4. Return Response
         return NextResponse.json({
@@ -103,7 +78,7 @@ export async function POST(request: Request) {
                 requestId,
                 splitAmount,
                 currency: 'ETH',
-                paymentLink, // The frontend can override the domain if needed
+                paymentLink,
                 createdAt: newSplit.createdAt,
             }
         });
