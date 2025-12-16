@@ -7,6 +7,7 @@ import { UserGroupIcon, CurrencyDollarIcon, ShareIcon, CheckCircleIcon, ArrowPat
 import toast, { Toaster } from 'react-hot-toast';
 import { QRCodeSVG } from 'qrcode.react';
 import confetti from 'canvas-confetti';
+import sdk from '@farcaster/frame-sdk';
 
 // Split Mode Types
 type SplitMode = 'equal' | 'percentage' | 'custom' | 'tip';
@@ -30,31 +31,27 @@ export default function Home() {
   const [splitResult, setSplitResult] = useState<{ splitAmount: number, paymentLink: string, details?: any[] } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [sdkLoaded, setSdkLoaded] = useState(false);
 
-  // Send ready message to Base when component mounts
+  // Initialize Farcaster SDK and send ready message
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Send ready signal in multiple formats for compatibility
-      const readyPayload = { type: 'ready' };
+    const initSDK = async () => {
+      try {
+        // Initialize Farcaster Frame SDK
+        await sdk.actions.ready();
+        setSdkLoaded(true);
+        console.log('✅ Farcaster SDK ready signal sent');
+      } catch (error) {
+        console.log('⚠️ Farcaster SDK not available, sending fallback ready signal');
+        // Fallback for non-Farcaster environments
+        if (typeof window !== 'undefined') {
+          window.parent.postMessage({ type: 'ready' }, '*');
+        }
+        setSdkLoaded(true);
+      }
+    };
 
-      // Standard postMessage
-      window.parent.postMessage(readyPayload, '*');
-
-      // Farcaster Frame SDK format
-      window.parent.postMessage({
-        type: 'frame_ready',
-        payload: { ready: true }
-      }, '*');
-
-      // Also try the @farcaster/frame-sdk format
-      window.parent.postMessage({
-        jsonrpc: '2.0',
-        method: 'frame_ready',
-        params: {}
-      }, '*');
-
-      console.log('✅ Ready signals sent to Base');
-    }
+    initSDK();
   }, []);
 
   // Force dark mode
