@@ -18,9 +18,6 @@ export function RootProvider({ children }: { children: ReactNode }) {
           preference: "smartWalletOnly",
         },
       }}
-      miniKit={{
-        enabled: true,
-      }}
     >
       {children}
     </OnchainKitProvider>
