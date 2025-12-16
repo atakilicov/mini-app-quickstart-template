@@ -33,10 +33,27 @@ export default function Home() {
 
   // Send ready message to Base when component mounts
   useEffect(() => {
-    // Notify parent frame that app is ready
     if (typeof window !== 'undefined') {
-      window.parent.postMessage({ type: 'ready' }, '*');
-      console.log('✅ Ready signal sent to Base');
+      // Send ready signal in multiple formats for compatibility
+      const readyPayload = { type: 'ready' };
+
+      // Standard postMessage
+      window.parent.postMessage(readyPayload, '*');
+
+      // Farcaster Frame SDK format
+      window.parent.postMessage({
+        type: 'frame_ready',
+        payload: { ready: true }
+      }, '*');
+
+      // Also try the @farcaster/frame-sdk format
+      window.parent.postMessage({
+        jsonrpc: '2.0',
+        method: 'frame_ready',
+        params: {}
+      }, '*');
+
+      console.log('✅ Ready signals sent to Base');
     }
   }, []);
 
