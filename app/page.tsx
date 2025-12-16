@@ -304,19 +304,7 @@ export default function Home() {
   const borderClass = 'border-gray-700/50';
   const inputBgClass = 'bg-gray-900/50 border-gray-700';
 
-  // Show loading state while frame is not ready (only in production and timeout not reached)
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  if (!isFrameReady && !isDevelopment && !frameTimeout) {
-    return (
-      <div className={`min-h-screen ${bgClass} ${textClass} font-sans flex items-center justify-center`}>
-        <div className="text-center">
-          <ArrowPathIcon className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading MiniKit...</p>
-          <p className="text-xs text-gray-600 mt-2">Initializing Base integration...</p>
-        </div>
-      </div>
-    );
-  }
+  // Frame ready check removed - app renders immediately and sends ready signal via postMessage
 
   return (
     <div className={`min-h-screen ${bgClass} ${textClass} font-sans overflow-x-hidden relative`}>
