@@ -283,6 +283,18 @@ export default function Home() {
   const borderClass = 'border-gray-700/50';
   const inputBgClass = 'bg-gray-900/50 border-gray-700';
 
+  // Show loading state while frame is not ready
+  if (!isFrameReady) {
+    return (
+      <div className={`min-h-screen ${bgClass} ${textClass} font-sans flex items-center justify-center`}>
+        <div className="text-center">
+          <ArrowPathIcon className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading MiniKit...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen ${bgClass} ${textClass} font-sans overflow-x-hidden relative`}>
       {/* Toast Container */}

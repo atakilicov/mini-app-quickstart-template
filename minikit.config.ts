@@ -21,7 +21,10 @@ export const minikitConfig = {
     name: "QuickSplit",
     subtitle: "Split bills instantly on Base",
     description: "The fastest way to split bills and settle debts with friends using Base. Instant, cheap, and seamless.",
-    screenshotUrls: [],
+    screenshotUrls: [
+      `${ROOT_URL}/screenshot.png`,
+      `${ROOT_URL}/screenshot-portrait.png`
+    ],
     iconUrl: `${ROOT_URL}/icon.png`,
     splashImageUrl: `${ROOT_URL}/splash.png`,
     splashBackgroundColor: "#0052FF",
