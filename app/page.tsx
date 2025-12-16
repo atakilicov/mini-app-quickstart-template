@@ -34,6 +34,15 @@ export default function Home() {
   const [showQR, setShowQR] = useState(false);
   const [frameTimeout, setFrameTimeout] = useState(false);
 
+  // Send ready message to Base when component mounts
+  useEffect(() => {
+    // Notify parent frame that app is ready
+    if (typeof window !== 'undefined') {
+      window.parent.postMessage({ type: 'ready' }, '*');
+      console.log('✅ Ready signal sent to Base');
+    }
+  }, []);
+
   // Timeout for frame loading - after 3 seconds, proceed anyway
   useEffect(() => {
     const timer = setTimeout(() => {
