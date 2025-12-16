@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownDisconnect, WalletDropdownLink, WalletDropdownBasename, WalletDropdownFundLink } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import { useAccount, useBalance } from 'wagmi';
@@ -21,7 +20,6 @@ type Transaction = {
 };
 
 export default function Home() {
-  const { isFrameReady } = useMiniKit();
   const { address, isConnected } = useAccount();
   const { data: balanceData, isLoading: isBalanceLoading } = useBalance({
     address: address,
@@ -32,7 +30,6 @@ export default function Home() {
   const [splitResult, setSplitResult] = useState<{ splitAmount: number, paymentLink: string, details?: any[] } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showQR, setShowQR] = useState(false);
-  const [frameTimeout, setFrameTimeout] = useState(false);
 
   // Send ready message to Base when component mounts
   useEffect(() => {
@@ -42,16 +39,6 @@ export default function Home() {
       console.log('✅ Ready signal sent to Base');
     }
   }, []);
-
-  // Timeout for frame loading - after 3 seconds, proceed anyway
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!isFrameReady) {
-        setFrameTimeout(true);
-      }
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [isFrameReady]);
 
   // Force dark mode
   const isDarkMode = true;
